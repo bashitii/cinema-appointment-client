@@ -6,7 +6,7 @@ function AdminLayout({ title, subtitle, children }) {
   return <div className="admin-shell"><AdminSidebar /><main className="admin-main"><h1>{title}</h1>{subtitle && <p className="page-subtitle">{subtitle}</p>}{children}</main></div>;
 }
 
-function Status({ value }) { return <span className={`status-pill status-${value.toLowerCase()}`}>{value}</span>; }
+function Status({ value }) { return <span className={`status-pill status-${value.toLowerCase().replace(/\s+/g, '-')}`}>{value}</span>; }
 
 function SimpleTable({ headings, rows }) {
   return <div className="table-card"><div className="table-responsive"><table className="table mb-0"><thead><tr>{headings.map((heading) => <th key={heading}>{heading}</th>)}</tr></thead><tbody>{rows.map((row, index) => <tr key={index}>{row.map((value, cell) => <td key={cell}>{value}</td>)}</tr>)}</tbody></table></div></div>;
