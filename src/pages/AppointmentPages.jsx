@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { appointments } from "../data";
@@ -13,9 +14,70 @@ function AppointmentCard({ appointment }) {
 
 export function AppointmentDetails() {
   const { id } = useParams();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   const appointment = appointments.find((item) => item.id === id) || appointments[0];
-  return <><Navbar /><main className="page-content"><Link className="back-link" to="/appointments">← Back to My Appointments</Link><div className="details-card"><div className={`appointment-poster poster ${appointment.color}`}><span>{appointment.movie}</span></div><div><span className="status-pill">{appointment.status}</span><h1>{appointment.movie}</h1><p>{appointment.date} · {appointment.time}</p><p>{appointment.screen} · Seats {appointment.seats}</p><hr /><h3>Appointment Details</h3><p>Booking reference: #{appointment.id}</p><p>Created for Cinema Nova</p>{appointment.status === "Confirmed" && <button className="btn btn-outline-danger">Cancel Appointment</button>}</div></div></main><Footer /></>;
+  const status = cancelled ? "Cancelled" : appointment.status;
+
+  return (
+    <>
+      <Navbar />
+      <main className="page-content">
+        <Link className="back-link" to="/appointments">← Back to My Appointments</Link>
+        <div className="details-card">
+          <div className={`appointment-poster poster ${appointment.color}`}>
+            <span>{appointment.movie}</span>
+          </div>
+          <div>
+            <span className="status-pill">{status}</span>
+            <h1>{appointment.movie}</h1>
+            <p>{appointment.date} · {appointment.time}</p>
+            <p>{appointment.screen} · Seats {appointment.seats}</p>
+            <hr />
+            <h3>Appointment Details</h3>
+            <p>Booking reference: #{appointment.id}</p>
+            <p>Created for Cinema Nova</p>
+
+            {status === "Confirmed" && !showConfirm && (
+              <button
+                className="btn btn-cancel-appointment"
+                onClick={() => setShowConfirm(true)}
+              >
+                Cancel Appointment
+              </button>
+            )}
+
+            {showConfirm && (
+              <div className="cancel-confirm-box">
+                <p className="cancel-confirm-question">Are you sure you want to cancel this appointment?</p>
+                <div className="cancel-confirm-actions">
+                  <button
+                    className="btn btn-confirm-yes"
+                    onClick={() => { setCancelled(true); setShowConfirm(false); }}
+                  >
+                    Yes, Cancel
+                  </button>
+                  <button
+                    className="btn btn-confirm-no"
+                    onClick={() => setShowConfirm(false)}
+                  >
+                    No, Keep Appointment
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {cancelled && (
+              <p className="cancel-done-msg">Your appointment has been cancelled.</p>
+            )}
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
 }
+
 
 export function Profile() {
   return <><Navbar /><main className="page-content profile-page"><h1>Customer Profile</h1><p className="page-subtitle">Manage your personal information</p><form className="profile-card"><label>Full Name<input defaultValue="Abedalrahman Bashiti" /></label><label>Email<input type="email" defaultValue="abedalrahman@example.com" /></label><label>New Password<input type="password" placeholder="Leave blank to keep current password" /></label><button className="btn gold-button">Save Changes</button></form></main><Footer /></>;
