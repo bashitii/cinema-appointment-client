@@ -1,16 +1,80 @@
-# React + Vite
+# 🎬 Cinema Appointment Frontend (React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the **frontend** for a cinema appointment web application built with **React + Vite**.
 
-Currently, two official plugins are available:
+## 🎯 Description
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The app allows two types of users:
 
-## React Compiler
+- 👤 **Regular users**:
+  - Browse movies and showtimes
+  - Select seats and book appointments
+  - View and cancel their appointments
+  - Edit their profile
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🛠️ **Admins**:
+  - Add, edit, and delete movies (with TMDB auto-fill)
+  - Manage screens and generate seats
+  - Schedule showtimes
+  - View and manage all appointments and users
 
-## Expanding the ESLint configuration
+Login and registration are included with a role-based flow (user/admin). Session is persisted using `localStorage`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🧑‍💻 User Requirements
+
+1. **Login or Register** with a name, email, and password
+2. **Regular users** can:
+   - Browse movies (now showing / coming soon)
+   - Pick a showtime and select seats
+   - Confirm and view their booking
+   - Cancel an existing appointment
+3. **Admin users** can:
+   - Add movies manually or auto-fill from TMDB
+   - Create screens and generate seats automatically
+   - Schedule showtimes for any movie and screen
+   - Manage all appointments and users
+4. The app remembers login sessions using `localStorage`
+
+## 🛠️ Technologies
+
+- React 19
+- Vite
+- React Router DOM
+- Fetch API
+- LocalStorage (for session persistence)
+
+## 🚀 Getting Started
+
+```bash
+cd Cinema-appointment-client
+npm install
+npm run dev
+```
+
+The app will run on: `http://localhost:5173`
+
+## 🗂️ Project Structure
+
+```
+Cinema-appointment-client/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx        # Top navigation bar
+│   │   ├── Footer.jsx        # Footer
+│   │   ├── MovieCard.jsx     # Reusable movie card
+│   │   └── AdminSidebar.jsx  # Admin panel sidebar
+│   ├── context/
+│   │   └── AuthContext.jsx   # Global auth state (login/logout)
+│   ├── pages/
+│   │   ├── AuthPages.jsx     # Login, Register, Admin Login
+│   │   ├── Home.jsx          # Homepage with now showing + TMDB trending
+│   │   ├── MoviePages.jsx    # Movie list and movie details
+│   │   ├── BookingPages.jsx  # Seat selection, summary, confirmation
+│   │   ├── AppointmentPages.jsx # My appointments, details, profile
+│   │   └── AdminPages.jsx    # Full admin panel
+│   ├── api.js                # Fetch wrapper (auto-attaches auth headers)
+│   ├── utils.js              # Helper functions (format status, time, duration)
+│   └── App.jsx               # Routes and protected route guards
+├── .env                      # VITE_API_URL
+└── vite.config.js            # Dev proxy to backend
+```
