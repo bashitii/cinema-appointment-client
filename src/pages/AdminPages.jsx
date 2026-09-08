@@ -254,15 +254,36 @@ export function MovieForm() {
     }
   };
 
+  // Converts "2h 46m" or "166" or 166 → integer minutes
+  function parseDuration(d) {
+    if (!d) return null;
+    if (typeof d === "number") return d;
+    const str = String(d).trim();
+    // Already a plain number
+    if (/^\d+$/.test(str)) return parseInt(str);
+    // "2h 46m" or "2h" or "46m"
+    const hMatch = str.match(/(\d+)\s*h/);
+    const mMatch = str.match(/(\d+)\s*m/);
+    const hours = hMatch ? parseInt(hMatch[1]) : 0;
+    const mins  = mMatch ? parseInt(mMatch[1]) : 0;
+    return hours * 60 + mins || null;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
+      // Convert duration "2h 46m" → minutes integer for the DB
+      const durationMins = parseDuration(form.duration);
+      // Convert status to snake_case for DB constraint
+      const statusDb = form.status === "Now Showing" ? "now_showing" : "coming_soon";
+      const payload = { ...form, duration: durationMins, status: statusDb };
+
       if (isEdit) {
-        await api.put(`/movies/${id}`, form);
+        await api.put(`/movies/${id}`, payload);
       } else {
-        await api.post("/movies", form);
+        await api.post("/movies", payload);
       }
       navigate("/admin/movies");
     } catch (err) {
@@ -683,7 +704,7 @@ export function ShowtimeForm() {
 
   const [movies, setMovies] = useState([]);
   const [screens, setScreens] = useState([]);
-  const [form, setForm] = useState({ movie_id: "", screen_id: "", start_time: "", end_time: "" });
+  const [form, setForm] = useState({ movie_id: "", screen_id: "", start_time: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -700,7 +721,7 @@ export function ShowtimeForm() {
       api.get(`/showtimes/${id}`).then((s) => {
         setForm({
           movie_id: s.movie_id, screen_id: s.screen_id,
-          start_time: toLocalInput(s.start_time), end_time: toLocalInput(s.end_time),
+          start_time: toLocalInput(s.start_time),
         });
       }).catch(() => {});
     }
@@ -708,13 +729,34 @@ export function ShowtimeForm() {
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
+  // Add minutes to a datetime-local string WITHOUT timezone conversion
+  // e.g. "2026-09-09T22:13" + 166 min = "2026-09-10T00:59"
+  function addMinsToLocalString(localStr, mins) {
+    if (!localStr) return "";
+    const [datePart, timePart] = localStr.split("T");
+    const [y, mo, d] = datePart.split("-").map(Number);
+    const [h, mi] = timePart.split(":").map(Number);
+    // Use Date.UTC so no local timezone offset is applied
+    const ms = Date.UTC(y, mo - 1, d, h, mi) + mins * 60000;
+    const end = new Date(ms);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}T${pad(end.getUTCHours())}:${pad(end.getUTCMinutes())}`;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      if (isEdit) { await api.put(`/showtimes/${id}`, form); }
-      else { await api.post("/showtimes", form); }
+      let payload = { ...form };
+      // Auto-calculate end_time if not provided
+      if (!payload.end_time && payload.start_time) {
+        const selectedMovie = movies.find((m) => String(m.movie_id) === String(payload.movie_id));
+        const durationMins = selectedMovie?.duration || 120;
+        payload.end_time = addMinsToLocalString(payload.start_time, durationMins);
+      }
+      if (isEdit) { await api.put(`/showtimes/${id}`, payload); }
+      else { await api.post("/showtimes", payload); }
       navigate("/admin/showtimes");
     } catch (err) {
       setError(err.message || "Failed to save showtime");
@@ -732,7 +774,7 @@ export function ShowtimeForm() {
         </label>
         <div className="form-row">
           <label>Start Time<input required type="datetime-local" name="start_time" value={form.start_time} onChange={handleChange} /></label>
-          <label>End Time<input type="datetime-local" name="end_time" value={form.end_time} onChange={handleChange} /></label>
+
         </div>
         <label>Screen
           <select name="screen_id" value={form.screen_id} onChange={handleChange}>
@@ -779,7 +821,6 @@ export function AdminAppointments() {
               style={{ padding: "2px 6px", fontSize: "0.8rem", borderRadius: "6px", cursor: "pointer" }}>
               <option value="confirmed">confirmed</option>
               <option value="cancelled">cancelled</option>
-              <option value="completed">completed</option>
             </select>,
           ])}
         />

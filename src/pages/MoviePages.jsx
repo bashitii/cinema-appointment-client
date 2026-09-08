@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MovieCard from "../components/MovieCard";
 import { api } from "../api";
-import { formatStatus, formatDuration, formatTime } from "../utils";
+import { formatStatus, formatDuration, formatTime, formatDateTime } from "../utils";
 
 // ─── Movie List ───────────────────────────────────────────────────────────────
 export function Movies() {
@@ -130,7 +130,7 @@ export function MovieDetails() {
               <div className="showtime-list">
                 {showtimes.map((s) => (
                   <button key={s.showtime_id} onClick={() => handleBookShowtime(s)} className="showtime-card">
-                    <span>{formatTime(s.start_time)}</span>
+                    <span>{formatDateTime(s.start_time)}</span>
                     <small>{s.screen_name} · Available seats</small>
                   </button>
                 ))}
