@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { api } from "../api";
+import { formatDateTime } from "../utils";
 import { useAuth } from "../context/AuthContext";
 
 // ─── My Appointments ──────────────────────────────────────────────────────────
@@ -263,15 +264,5 @@ export function Profile() {
       </main>
       <Footer />
     </>
-  );
-}
-
-function formatDateTime(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return (
-    d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) +
-    " · " +
-    d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
   );
 }
