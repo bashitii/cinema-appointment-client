@@ -199,7 +199,7 @@ export function MovieForm() {
           duration: movie.duration || "",
           release_date: movie.release_date ? movie.release_date.split("T")[0] : "",
           poster_url: movie.poster_url || "",
-          status: movie.status || "Now Showing",
+          status: movie.status === "now_showing"  ? "Now Showing" : "Coming Soon",
         });
       }).catch(() => {});
     }
